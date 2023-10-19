@@ -44,32 +44,42 @@ public class Main {
         final int capacity = 2;
 
         public void produce() throws InterruptedException {
-            synchronized (list) {
+            while(true){
+                synchronized (this) {
                 // If the list is already full, wait to be notified that 
                 // the consumer has consumed a value from the list
-                if (list.size() >= capacity) {
-                    list.wait();
+                while(list.size() == capacity){
+                    this.wait();
                 }
 
                 int randomInt = rng.nextInt(100);
                 list.add(randomInt);
                 System.out.println("Adding " + randomInt + " to the list...");
-                list.notify();
+                this.notify();
+
+                //Thread.sleep(1000);
+                }
             }
+            
         }
         
         public void consume() throws InterruptedException {
-            synchronized (list) {
+            while(true){
+                synchronized (this) {
                 // If the list is empty, wait to be notified that
                 // the producer has produced a value
-                if (list.size() == 0) {
-                    list.wait();
+                while(list.size() == 0) {
+                    this.wait();
                 }
 
-                int consumedInt = list.removeLast();
+                int consumedInt = list.removeFirst();
                 System.out.println("Consumed " + consumedInt + " from the list...");
-                list.notify();
+                this.notify();
+
+                //Thread.sleep(1000);
+                }
             }
+            
         }
     }
 }
